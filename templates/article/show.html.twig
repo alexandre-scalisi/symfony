@@ -34,5 +34,13 @@
 
     <a href="{{ path('article_edit', {'id': article.id}) }}">edit</a>
 
+    {{ include('article/_form_comment.html.twig') }}
+
+    {% for com in article.comment %}
+        <p>123{{com.message}}</p>
+    {% else %}
+
+    {% endfor %}
+
     {{ include('article/_delete_form.html.twig') }}
 {% endblock %}
