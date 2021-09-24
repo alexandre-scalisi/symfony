@@ -37,7 +37,7 @@
     {{ include('article/_form_comment.html.twig') }}
 
     {% for com in article.comment %}
-        <p>123{{com.message}}</p>
+        <p>Author: {{com.author.username}}, message: {{com.message}}, createdAt: {{ com.createdAt|date('Y-m-d H:i:s') }}</p>
     {% else %}
 
     {% endfor %}
