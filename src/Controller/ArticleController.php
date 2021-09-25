@@ -55,6 +55,21 @@ class ArticleController extends AbstractController
     }
 
     /**
+     * @Route("/{id}/delete", name="article_delete", methods={"POST"})
+     */
+    public function delete(Request $request, Article $article): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($article);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('article_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+
+    /**
      * @Route("/{id}", name="article_show", methods={"GET", "POST"})
      */
     public function show(Article $article, Request $request): Response
@@ -103,17 +118,5 @@ class ArticleController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/{id}", name="article_delete", methods={"POST"})
-     */
-    public function delete(Request $request, Article $article): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($article);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('article_index', [], Response::HTTP_SEE_OTHER);
-    }
+    
 }

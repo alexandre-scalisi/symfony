@@ -3,8 +3,8 @@
         <h3 class="text-2xl font-bold text-blue-600">Blog</h3>
         <ul class="flex gap-x-4">
             <li><a href="{{ path('article_index') }}" class="text-xl font-bold hover:underline">Articles</a></li>
-            {% if is_granted('ROLE_ADMIN') %}
-                <li><a href="{{ path('article_index') }}" class="text-xl font-bold hover:underline">Nouvel article</a></li>
+            {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_POSTER') %}
+                <li><a href="{{ path('article_new') }}" class="text-xl font-bold hover:underline">Nouvel article</a></li>
             {% endif %}
         </ul>
     </div>

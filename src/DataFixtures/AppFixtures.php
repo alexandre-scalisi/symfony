@@ -23,14 +23,17 @@ class AppFixtures extends Fixture
     {
         $faker = Faker\Factory::create('fr_FR');
 
-        $users = [];
-        
+        $posters = [];
+        $roles = ['USER', 'POSTER', 'ADMIN'];
 
-        for($i = 0; $i < 10; $i++) {
+        for($i = 0; $i < 60; $i++) {
             $user = new User();
             $user->setEmail($faker->email);
             $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
-            $users[] = $user;
+            $role = ['ROLE_' . $roles[rand(0, count($roles) - 1)]];
+            $user->setRoles($role);
+            if($role !== 'ROLE_USER');
+                $posters[] = $user;
             $manager->persist($user);
         }
         
@@ -38,7 +41,7 @@ class AppFixtures extends Fixture
         $admin->setEmail('admin@admin.admin');
         $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password'));
         $admin->setRoles(['ROLE_ADMIN']);
-        $users[] = $admin;
+        $posters[] = $admin;
         $manager->persist($admin);
         
         
@@ -48,7 +51,7 @@ class AppFixtures extends Fixture
                 $article->setTitle(implode(' ', $faker->words(rand(1, 6))));
                 $article->setContent(implode(' ', $faker->sentences(rand(5, 30))));
                 $article->setPhoto('https://picsum.photos/200/300?random='.$i);
-                $article->setAuthor($users[rand(0, count($users)-1)]);
+                $article->setAuthor($posters[rand(0, count($posters) -1)]);
                 $manager->persist($article);
             }
             

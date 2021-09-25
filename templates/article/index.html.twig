@@ -5,19 +5,20 @@
 {% block body %}
     
 
-    <h1 class="text-green-100 text-center text-3xl mb-12">Tous les articles</h1>
+    <h1 class="text-green-500 text-center text-3xl mb-12 font-bold">Tous les articles</h1>
     <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 justify-center">
         {% for article in articles %}
             <div class="w-96 mb-20 mx-auto">
                 <a href="{{ path('article_show', {'id': article.id}) }}" class="capitalize text-2xl text-bold text-gray-600 mb-3">{{ article.title }}</a>
                 <p class="text-xl text-bold text-gray-600 mb-2">Par {{ article.author.username }} </p>
-                <p class="text-sm mb-3">{{article.createdAt|date('d/m/Y à H:m')}}</p>
-                <img src="{{ article.photo }}" alt="{{ article.title }}" class="float-right ml-8 mb-4">
+                <p class="text-sm mb-4">Le {{article.createdAt|date('d/m/Y à H:m')}} <span class="float-right text-lg">{{article.comment|length}} commentaire(s)</span></p>
+                <img src="{{ article.photo }}" alt="{{ article.title }}" class="float-right ml-8 mb-4 mt-2">
                 <p>{{ article.content }}</p>
                     <div class="flex gap-3 mt-3">
                         <a href="{{ path('article_show', {'id': article.id}) }}" class="text-xl text-blue-400 font-bold"->Voir</a>
-                        {% if is_granted('ROLE_ADMIN') %}
+                        {% if is_granted('ROLE_ADMIN') or (is_granted('ROLE_POSTER') and app.user.username == article.author.username)%}
                             <a href="{{ path('article_edit', {'id': article.id}) }}" class="text-xl text-yellow-600 font-bold">Modifier</a>
+                            {% include 'article/_delete_form.html.twig' %}
                         {% endif %}
                     </div>
                 
