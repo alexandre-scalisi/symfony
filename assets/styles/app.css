@@ -4,3 +4,11 @@
 body {
 @apply bg-gray-100;
 }
+
+input, textarea {
+  @apply ml-2 border border-gray-800;
+}
+
+textarea {
+  @apply block my-2 ml-0;
+}

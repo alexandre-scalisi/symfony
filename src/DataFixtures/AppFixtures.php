@@ -25,11 +25,11 @@ class AppFixtures extends Fixture
 
         $posters = [];
         $roles = ['USER', 'POSTER', 'ADMIN'];
-
         for($i = 0; $i < 60; $i++) {
             $user = new User();
             $user->setEmail($faker->email);
             $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
+            $user->setUsername($faker->userName);
             $role = ['ROLE_' . $roles[rand(0, count($roles) - 1)]];
             $user->setRoles($role);
             if($role !== 'ROLE_USER');
@@ -39,6 +39,7 @@ class AppFixtures extends Fixture
         
         $admin = new User();
         $admin->setEmail('admin@admin.admin');
+        $admin->setUsername('admin');
         $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password'));
         $admin->setRoles(['ROLE_ADMIN']);
         $posters[] = $admin;
