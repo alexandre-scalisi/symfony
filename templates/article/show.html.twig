@@ -6,27 +6,36 @@
 <h1 class="text-3xl font-bold capitalize">{{ article.title }}</h1>
 
 <div class="w-96 mb-20">
-    <p class="text-xl text-bold text-gray-600 mb-4">Par {{ article.author.username }} <span class="text-sm ml-3">{{article.createdAt|date('d/m/Y à H:m')}}</p>
+    <p class="text-xl text-bold text-gray-600 mb-4">Par {{ article.author.username }} <span
+            class="text-sm ml-3">{{article.createdAt|date('d/m/Y à H:m')}}</p>
     <img src="{{ article.photo }}" alt="{{ article.title }}" class="float-right ml-8 mb-4 mt-2">
     <p>{{ article.content }}</p>
     <div class="flex gap-3 mt-3">
         {% if is_granted('ROLE_ADMIN') or (is_granted('ROLE_POSTER') and app.user.username == article.author.username) %}
-            <a href="{{ path('article_edit', {'id': article.id}) }}" class="text-xl text-yellow-600 font-bold">Modifier</a>
-            {% include 'article/_delete_form.html.twig' %}
+        <a href="{{ path('article_edit', {'id': article.id}) }}" class="text-xl text-yellow-600 font-bold">Modifier</a>
+        {% include 'article/_delete_form.html.twig' %}
         {% endif %}
         <a href="{{ path('article_index') }}" class="text-xl font-bold">Retour</a>
     </div>
-
+    <div class="likes-parent">
+        <a href="{{ path('article_like', {'id': article.id}) }}"
+            class="like text-2xl {{ article.isLikedByUser(app.user) is same as(false) ? 'underline' : null }}"
+            data-like="false">-</a>
+        <span>{{article.likesAverage}}</span>
+        <a href="{{ path('article_like', {'id': article.id}) }}"
+            class="like text-2xl {{ article.isLikedByUser(app.user) ? 'underline' : null }}" data-like="true">+</a>
+    </div>
 </div>
 
 
+
 {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-    {{ include('article/_form_comment.html.twig') }}
+{{ include('article/_form_comment.html.twig') }}
 {% else %}
-    <div>
-        <p>Vous devez etre connecté pour pouvoir commenter.</p>
-        <a href="{{ path('app_login') }}" class="text-green-400">Se connecter</a>
-    </div>
+<div>
+    <p>Vous devez etre connecté pour pouvoir commenter.</p>
+    <a href="{{ path('app_login') }}" class="text-green-400">Se connecter</a>
+</div>
 {% endif %}
 
 <h3 class="mt-12 text-xl">Commentaires : </h3>
@@ -34,7 +43,8 @@
 <div class="p-4">
     {% for com in article.comment %}
     <div class="max-w-4xl mb-6">
-        <p class="text-xl mb-4">{{com.author.username}} <span class="ml-4 text-sm">le {{article.createdAt|date('d/m/Y à H:m')}}</p>
+        <p class="text-xl mb-4">{{com.author.username}} <span class="ml-4 text-sm">le
+                {{article.createdAt|date('d/m/Y à H:m')}}</p>
         <p>{{com.message}}</p>
     </div>
     {% else %}

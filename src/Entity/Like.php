@@ -20,42 +20,59 @@ class Like
 
     /**
      * @ORM\ManyToOne(targetEntity=Article::class, inversedBy="likes")
-     * @ORM\JoinColumn(nullable=false))
+     * @ORM\JoinColumn(nullable=false)
      */
     private $article;
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="likes")
      */
-    private $likers;
+    private $liker;
+
+    /**
+     * @ORM\Column(type="boolean", nullable=true)
+     */
+    private $isLiked;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getArticle(): Article
+    public function getArticle(): ?Article
     {
         return $this->article;
     }
 
-    public function setArticle(Article $article): self
+    public function setArticle(?Article $article): self
     {
         $this->article = $article;
 
         return $this;
     }
 
-    public function getLikers(): User
+    public function getLiker(): ?User
     {
-        return $this->likers;
+        return $this->liker;
     }
 
-    public function setLikers(User $likers): self
+    public function setLiker(?User $liker): self
     {
-        $this->likers = $likers;
+        $this->liker = $liker;
 
         return $this;
     }
+
+    public function getIsLiked(): ?bool
+    {
+        return $this->isLiked;
+    }
+
+    public function setIsLiked(?bool $isLiked): self
+    {
+        $this->isLiked = $isLiked;
+
+        return $this;
+    }
+
 }

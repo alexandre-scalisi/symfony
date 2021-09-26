@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Article;
+use App\Entity\Like;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -24,6 +25,7 @@ class AppFixtures extends Fixture
         $faker = Faker\Factory::create('fr_FR');
 
         $posters = [];
+        $users = [];
         $roles = ['USER', 'POSTER', 'ADMIN'];
         for($i = 0; $i < 60; $i++) {
             $user = new User();
@@ -34,6 +36,7 @@ class AppFixtures extends Fixture
             $user->setRoles($role);
             if($role !== 'ROLE_USER');
                 $posters[] = $user;
+            $users[] = $user;
             $manager->persist($user);
         }
         
@@ -43,8 +46,10 @@ class AppFixtures extends Fixture
         $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password'));
         $admin->setRoles(['ROLE_ADMIN']);
         $posters[] = $admin;
+        $users[] = $admin;
         $manager->persist($admin);
-        
+
+
         
         for($i = 0; $i < 20; $i++) {
                 $article = new Article();
@@ -54,6 +59,19 @@ class AppFixtures extends Fixture
                 $article->setPhoto('https://picsum.photos/200/300?random='.$i);
                 $article->setAuthor($posters[rand(0, count($posters) -1)]);
                 $manager->persist($article);
+
+                $likers = $users;
+                for($j = 0; $j < rand(0, count($users)); $j++) {
+                    $like = new Like();
+                    $like->setArticle($article);
+                    
+                    $randomLikerIndex = rand(0, count($likers) - 1);
+                    $liker = array_splice($likers, $randomLikerIndex, 1)[0];
+                    $like->setLiker($liker);
+                    $like->setIsLiked(rand(0,1) == 1);
+
+                    $manager->persist($like);
+                }
             }
             
         $manager->flush();

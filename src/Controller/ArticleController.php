@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use App\Entity\Article;
 use App\Entity\Comment;
+use App\Entity\Like;
 use App\Form\ArticleType;
 use App\Form\CommentType;
 use App\Repository\ArticleRepository;
+use App\Repository\LikeRepository;
 use DateTime;
+use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -119,13 +122,61 @@ class ArticleController extends AbstractController
     }
 
     /**
+     * désolé c'est le bordel
      * @Route("/{id}/like", name="article_like", methods={"POST"})
      */
 
-    public function like(Request $request, Article $article): Response
+    public function like(Request $request, Article $article, LikeRepository $likeRepository): Response
     {
 
-        return $this->json(['message' => $article->getTitle()], 200);
+        $user = $this->getUser();
+        
+        
+        if(!$user) return $this->json([
+            'message' => "Vous devez être connecté pour voter",
+            'selected' => 'none',
+        ], 403);
+        
+        $entityManager = $this->getDoctrine()->getManager();
+
+        if($article->getIsLikedByUser($user) !== null) {
+            $like = $likeRepository->findOneBy([
+                'article' => $article,
+                'liker' => $user
+            ]);
+
+            if($like->getIsLiked() === false && $request->getContent() === "false" || $like->getIsLiked() === true && $request->getContent() === "true") {
+                $entityManager->remove($like);
+                $entityManager->flush();
+                return $this->json([
+                    'message' => 'Vous avez bien désélectionné',
+                    'selected' => 'none',
+                ]);
+            }
+
+            $like->setIsLiked($request->getContent() === "true" ? true : false);
+            $entityManager->persist($like);
+            $entityManager->flush();
+            return $this->json([
+                'message' => 'Vous avez bien changé d\'avis',
+                'selected' => $like->getIsLiked(),
+            ]);
+            
+        } else {
+            $like = new Like();
+            $like->setLiker($user);
+            $like->setArticle($article);
+            $like->setIsLiked($request->getContent() === "true" ? true : false);
+            $entityManager->persist($like);
+            $entityManager->flush();
+            return $this->json([
+                'message' => "Vous avez bien selectionné",
+                'selected' => $like->getIsLiked(),
+                'new' => true
+            ]);
+        }
+        
+        
     }
 
     

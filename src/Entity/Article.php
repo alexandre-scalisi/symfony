@@ -48,10 +48,11 @@ class Article
     /**
      * @ORM\OneToMany(targetEntity=Comment::class, mappedBy="article", orphanRemoval=true)
      */
+
     private $comment;
 
     /**
-     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="article")
+     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="article", orphanRemoval=true)
      */
     private $likes;
 
@@ -185,4 +186,30 @@ class Article
 
         return $this;
     }
+
+    public function getLikesAverage() :int
+    {
+        return array_reduce($this->likes->toArray(), function($a, $b) {
+        
+           return $b->getIsLiked() ? ($a + 1) : $a - 1; 
+        }, 0);
+    }
+
+    /**
+     * return true si like, false si dislike et null si pas encore choisi ou pas connecté
+     * @return bool|null
+     */
+    public function getIsLikedByUser(?User $user): ?bool
+    {
+        if(!$user) return null;
+        foreach($this->likes as $like) {
+            
+            if($like->getLiker() === $user) {
+                return $like->getIsLiked();
+            }
+        }
+        
+        return null;
+    }
+
 }
