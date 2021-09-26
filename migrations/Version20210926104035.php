@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20210925180002 extends AbstractMigration
+final class Version20210926104035 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -26,16 +26,22 @@ final class Version20210925180002 extends AbstractMigration
         $this->addSql('ALTER TABLE article ADD CONSTRAINT FK_23A0E66F675F31B FOREIGN KEY (author_id) REFERENCES user (id)');
         $this->addSql('ALTER TABLE comment ADD CONSTRAINT FK_9474526CF675F31B FOREIGN KEY (author_id) REFERENCES user (id)');
         $this->addSql('ALTER TABLE comment ADD CONSTRAINT FK_9474526C7294869C FOREIGN KEY (article_id) REFERENCES article (id)');
+        $this->addSql('ALTER TABLE `like` CHANGE article_id article_id INT NOT NULL');
+        $this->addSql('ALTER TABLE `like` ADD CONSTRAINT FK_AC6340B37294869C FOREIGN KEY (article_id) REFERENCES article (id)');
+        $this->addSql('ALTER TABLE `like` ADD CONSTRAINT FK_AC6340B321EAFB87 FOREIGN KEY (likers_id) REFERENCES user (id)');
     }
 
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE comment DROP FOREIGN KEY FK_9474526C7294869C');
+        $this->addSql('ALTER TABLE `like` DROP FOREIGN KEY FK_AC6340B37294869C');
         $this->addSql('ALTER TABLE article DROP FOREIGN KEY FK_23A0E66F675F31B');
         $this->addSql('ALTER TABLE comment DROP FOREIGN KEY FK_9474526CF675F31B');
+        $this->addSql('ALTER TABLE `like` DROP FOREIGN KEY FK_AC6340B321EAFB87');
         $this->addSql('DROP TABLE article');
         $this->addSql('DROP TABLE comment');
         $this->addSql('DROP TABLE user');
+        $this->addSql('ALTER TABLE `like` CHANGE article_id article_id INT DEFAULT NULL');
     }
 }

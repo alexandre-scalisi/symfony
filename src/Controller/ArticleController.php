@@ -118,5 +118,15 @@ class ArticleController extends AbstractController
         ]);
     }
 
+    /**
+     * @Route("/{id}/like", name="article_like", methods={"POST"})
+     */
+
+    public function like(Request $request, Article $article): Response
+    {
+
+        return $this->json(['message' => $article->getTitle()], 200);
+    }
+
     
 }

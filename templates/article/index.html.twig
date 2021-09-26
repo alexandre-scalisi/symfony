@@ -21,7 +21,7 @@
                             {% include 'article/_delete_form.html.twig' %}
                         {% endif %}
                     </div>
-                
+                <a href="{{ path('article_like', {'id': article.id}) }}" class="like">Like</a>
             </div>
         {% else %}
             Pas d'articles
@@ -31,3 +31,6 @@
 
     
 {% endblock %}
+{# {% block javascripts %}
+    <script src="{{ asset('js/like.js') }}"></script>
+{% endblock %} #}
