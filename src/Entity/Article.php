@@ -189,8 +189,8 @@ class Article
 
     public function getLikesAverage() :int
     {
+        // return count($this->likes);
         return array_reduce($this->likes->toArray(), function($a, $b) {
-        
            return $b->getIsLiked() ? ($a + 1) : $a - 1; 
         }, 0);
     }

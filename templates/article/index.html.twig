@@ -24,7 +24,7 @@
                
                 <div class="likes-parent">
                     <a href="{{ path('article_like', {'id': article.id}) }}" class="like text-2xl {{ article.isLikedByUser(app.user) is same as(false) ? 'underline' : null }}" {{ app.user ? "data-like='false'" : null}}>-</a>
-                    <span>{{article.likesAverage}}</span>
+                    <span id="vote-average">{{article.likesAverage}}</span>
                     <a href="{{ path('article_like', {'id': article.id}) }}" class="like text-2xl {{ article.isLikedByUser(app.user) ? 'underline' : null }}" {{ app.user ? "data-like='true'" : null}}>+</a>
                 </div>
                 

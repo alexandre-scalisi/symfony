@@ -122,61 +122,71 @@ class ArticleController extends AbstractController
     }
 
     /**
-     * désolé c'est le bordel
+     * Route AJAX (requête crée dans assets/js/like.js)
      * @Route("/{id}/like", name="article_like", methods={"POST"})
      */
 
     public function like(Request $request, Article $article, LikeRepository $likeRepository): Response
     {
-
         $user = $this->getUser();
         
+        if(!$user) return $this->json('', 403);
         
-        if(!$user) return $this->json([
-            'message' => "Vous devez être connecté pour voter",
-            'selected' => 'none',
-        ], 403);
         
-        $entityManager = $this->getDoctrine()->getManager();
-
         if($article->getIsLikedByUser($user) !== null) {
             $like = $likeRepository->findOneBy([
                 'article' => $article,
                 'liker' => $user
             ]);
 
-            if($like->getIsLiked() === false && $request->getContent() === "false" || $like->getIsLiked() === true && $request->getContent() === "true") {
-                $entityManager->remove($like);
-                $entityManager->flush();
-                return $this->json([
-                    'message' => 'Vous avez bien désélectionné',
-                    'selected' => 'none',
-                ]);
-            }
+            if($like->getIsLiked() === false && $request->getContent() === "false" || $like->getIsLiked() === true && $request->getContent() === "true") 
+                return $this->unclick($like, $article);
 
-            $like->setIsLiked($request->getContent() === "true" ? true : false);
-            $entityManager->persist($like);
+            return $this->changedMyMind($like, $request, $article);
+
+        } else return $this->newVote($user, $article, $request);
+        
+    }
+
+    private function unclick($like, $article) {
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($like);
+        $entityManager->flush();
+        $avg = $article->getLikesAverage();
+        return $this->json([
+            'message' => 'Vous avez bien désélectionné',
+            'selected' => 'none',
+            'avg' => $avg
+        ]);
+    }
+
+    private function changedMyMind($like, $request, $article) {
+        $entityManager = $this->getDoctrine()->getManager();
+        $like->setIsLiked($request->getContent() === "true" ? true : false);
             $entityManager->flush();
+            $avg = $article->getLikesAverage();
             return $this->json([
                 'message' => 'Vous avez bien changé d\'avis',
                 'selected' => $like->getIsLiked(),
+                'avg' => $avg
             ]);
-            
-        } else {
-            $like = new Like();
-            $like->setLiker($user);
-            $like->setArticle($article);
-            $like->setIsLiked($request->getContent() === "true" ? true : false);
-            $entityManager->persist($like);
-            $entityManager->flush();
-            return $this->json([
-                'message' => "Vous avez bien selectionné",
-                'selected' => $like->getIsLiked(),
-                'new' => true
-            ]);
-        }
-        
-        
+    }
+
+    private function newVote($user, $article, $request) {
+        $entityManager = $this->getDoctrine()->getManager();
+        $like = new Like();
+        $like->setLiker($user)
+            ->setArticle($article)
+            ->setIsLiked($request->getContent() === "true" ? true : false);
+        $entityManager->persist($like);
+        $article->addLike($like);
+        $entityManager->flush();
+        $avg = $article->getLikesAverage();
+        return $this->json([
+            'message' => "Vous avez bien selectionné",
+            'selected' => $like->getIsLiked(),
+            'avg' => $avg
+        ]);
     }
 
     
