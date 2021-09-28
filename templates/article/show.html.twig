@@ -38,12 +38,12 @@
 </div>
 {% endif %}
 
-<h3 class="mt-12 text-xl">Commentaires : </h3>
+<h3 class="mt-12 text-2xl">Commentaires : </h3>
 
 <div class="p-4">
     {% for com in article.comment %}
-    <div class="max-w-4xl mb-6">
-        <p class="text-xl mb-4">{{com.author.username}} <span class="ml-4 text-sm">le
+    <div class="max-w-4xl mb-12">
+        <p class="text-xl mb-2">{{com.author.username}} <span class="ml-2 text-xs">le
                 {{article.createdAt|date('d/m/Y à H:m')}}</p>
         <p>{{com.message}}</p>
     </div>

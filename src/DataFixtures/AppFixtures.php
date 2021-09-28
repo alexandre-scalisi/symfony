@@ -3,6 +3,7 @@
 namespace App\DataFixtures;
 
 use App\Entity\Article;
+use App\Entity\Comment;
 use App\Entity\Like;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -22,58 +23,103 @@ class AppFixtures extends Fixture
 
     public function load(ObjectManager $manager)
     {
-        $faker = Faker\Factory::create('fr_FR');
+        $this->manager = $manager;
+        $this->faker = Faker\Factory::create('fr_FR');
 
-        $posters = [];
-        $users = [];
+        $this->posters = [];
+        $this->users = [];
+
+        $this->generateRandomUsers(60);
+        
+        $this->generateAdmin();
+
+        // les likes et commentaires sont aussi générés indirectement dans cette fonction
+        $this->generateRandomArticles(20);
+            
+        $this->manager->flush();
+    }
+
+
+
+    private function generateRandomUsers(int $amount) {
         $roles = ['USER', 'POSTER', 'ADMIN'];
-        for($i = 0; $i < 60; $i++) {
+
+        for($i = 0; $i < $amount; $i++) {
             $user = new User();
-            $user->setEmail($faker->email);
-            $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
-            $user->setUsername($faker->userName);
+            $user
+                ->setEmail($this->faker->email)
+                ->setPassword($this->passwordHasher->hashPassword($user, 'password'))
+                ->setUsername($this->faker->userName);
+
             $role = ['ROLE_' . $roles[rand(0, count($roles) - 1)]];
             $user->setRoles($role);
+
             if($role !== 'ROLE_USER');
-                $posters[] = $user;
-            $users[] = $user;
-            $manager->persist($user);
+                $this->posters[] = $user;
+            $this->users[] = $user;
+            $this->manager->persist($user);
         }
-        
+    }
+
+    private function generateAdmin() {
         $admin = new User();
-        $admin->setEmail('admin@admin.admin');
-        $admin->setUsername('admin');
-        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password'));
-        $admin->setRoles(['ROLE_ADMIN']);
-        $posters[] = $admin;
-        $users[] = $admin;
-        $manager->persist($admin);
+        $admin->setEmail('admin@admin.admin')
+            ->setUsername('admin')
+            ->setPassword($this->passwordHasher->hashPassword($admin, 'password'))
+            ->setRoles(['ROLE_ADMIN']);
+        $this->posters[] = $admin;
+        $this->users[] = $admin;
+        $this->manager->persist($admin);
+    }
 
+    private function generateRandomArticles(int $amount) {
+        for($i = 0; $i < $amount; $i++) {
+            $article = new Article();
+            $article->setCreatedAt(new \DateTime($this->faker->date()))
+                ->setTitle(implode(' ', $this->faker->words(rand(1, 6))))
+                ->setContent(implode(' ', $this->faker->sentences(rand(5, 30))))
+                ->setPhoto('https://picsum.photos/200/300?random='.$i)
+                ->setAuthor($this->posters[rand(0, count($this->posters) - 1)]);
+            $this->manager->persist($article);
 
-        
-        for($i = 0; $i < 20; $i++) {
-                $article = new Article();
-                $article->setCreatedAt(new \DateTime($faker->date()));
-                $article->setTitle(implode(' ', $faker->words(rand(1, 6))));
-                $article->setContent(implode(' ', $faker->sentences(rand(5, 30))));
-                $article->setPhoto('https://picsum.photos/200/300?random='.$i);
-                $article->setAuthor($posters[rand(0, count($posters) -1)]);
-                $manager->persist($article);
-
-                $likers = $users;
-                for($j = 0; $j < rand(0, count($users)); $j++) {
-                    $like = new Like();
-                    $like->setArticle($article);
-                    
-                    $randomLikerIndex = rand(0, count($likers) - 1);
-                    $liker = array_splice($likers, $randomLikerIndex, 1)[0];
-                    $like->setLiker($liker);
-                    $like->setIsLiked(rand(0,1) == 1);
-
-                    $manager->persist($like);
-                }
-            }
+            // génere un nombre aléatoire de likes aléatoires pour l'article
+            $this->generateRandomLikes($article);
             
-        $manager->flush();
+            // génere un nombre aléatoire de commentaires aléatoires pour l'article
+            $this->generateRandomComments($article);
+        }
+    }
+
+    private function generateRandomLikes($article) {
+        // copie de l'array des users dans une nouvelle variable
+        $potentialLikers = $this->users;
+        for($j = 0; $j < rand(0, count($this->users)); $j++) {
+            $like = new Like();
+            $like->setArticle($article);
+            
+            $randomLikerIndex = rand(0, count($potentialLikers) - 1);
+            $liker = array_splice($potentialLikers, $randomLikerIndex, 1)[0];
+            $like->setLiker($liker)
+                 ->setIsLiked(rand(0,1) == 1);
+
+            $this->manager->persist($like);
+        }
+    }
+
+    private function generateRandomComments($article) {
+        $potentialAuthors = $this->users;
+        for($j = 0; $j < rand(0, count($this->users)); $j++) {
+            $comment = new Comment();
+            $comment->setMessage($this->faker->text);
+            $comment->setArticle($article);
+            $comment->setCreatedAt($this->faker->dateTimeBetween($article->getCreatedAt(), new \DateTime()));
+            
+
+            $randomAuthorIndex = rand(0, count($potentialAuthors) - 1);
+            $author = array_splice($potentialAuthors, $randomAuthorIndex, 1)[0];
+            $comment->setAuthor($author);
+
+            $this->manager->persist($comment);
+        }
     }
 }

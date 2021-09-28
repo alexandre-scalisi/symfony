@@ -42,10 +42,11 @@ class ArticleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
-            $article->setCreatedAt(new DateTime('now'));
-            $article->setAuthor($this->getUser());
-            $entityManager->persist($article);
+            $article
+                ->setCreatedAt(new DateTime('now'))
+                ->setAuthor($this->getUser());
 
+            $entityManager->persist($article);
             $entityManager->flush();
 
             return $this->redirectToRoute('article_index', [], Response::HTTP_SEE_OTHER);
@@ -83,14 +84,14 @@ class ArticleController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
-            $comment->setCreatedAt(new DateTime('now'));
-            $comment->setAuthor($this->getUser());
-            $comment->setArticle($article);
+            $comment
+                ->setCreatedAt(new DateTime('now'))
+                ->setAuthor($this->getUser())
+                ->setArticle($article);
             $entityManager->persist($comment);
             
 
             $entityManager->flush();
-
         }
         
 
