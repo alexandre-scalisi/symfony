@@ -3,37 +3,42 @@
 {% block title %}Article index{% endblock %}
 
 {% block body %}
-    
+<h1 class="text-green-500 text-center text-3xl mb-12 font-bold">Tous les articles</h1>
+<div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 justify-center">
+    {% for article in articles %}
+    <div class="w-96 mb-20 mx-auto">
+        <a href="{{ path('article_show', {'id': article.id}) }}"
+            class="capitalize text-2xl text-bold text-gray-600 mb-3">{{ article.title }}</a>
+        <p class="text-xl text-bold text-gray-600 mb-2">Par {{ article.author.username }} </p>
+        <p class="text-sm mb-4">Le {{article.createdAt|date('d/m/Y à H:m')}} <span
+                class="float-right text-lg">{{article.comment|length}} commentaire(s)</span></p>
+        <img src="{{ article.photo }}" alt="{{ article.title }}" class="float-right ml-8 mb-4 mt-2">
+        <p>{{ article.content }}</p>
+        <div class="flex gap-3 mt-3">
+            <a href="{{ path('article_show', {'id': article.id}) }}" class="text-xl text-blue-400 font-bold" ->Voir</a>
+            {% if is_granted('ROLE_ADMIN') or (is_granted('ROLE_POSTER') and app.user.username == article.author.username)%}
+            <a href="{{ path('article_edit', {'id': article.id}) }}"
+                class="text-xl text-yellow-600 font-bold">Modifier</a>
+            {% include 'article/_delete_form.html.twig' %}
+            {% endif %}
+        </div>
 
-    <h1 class="text-green-500 text-center text-3xl mb-12 font-bold">Tous les articles</h1>
-    <div class="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 justify-center">
-        {% for article in articles %}
-            <div class="w-96 mb-20 mx-auto">
-                <a href="{{ path('article_show', {'id': article.id}) }}" class="capitalize text-2xl text-bold text-gray-600 mb-3">{{ article.title }}</a>
-                <p class="text-xl text-bold text-gray-600 mb-2">Par {{ article.author.username }} </p>
-                <p class="text-sm mb-4">Le {{article.createdAt|date('d/m/Y à H:m')}} <span class="float-right text-lg">{{article.comment|length}} commentaire(s)</span></p>
-                <img src="{{ article.photo }}" alt="{{ article.title }}" class="float-right ml-8 mb-4 mt-2">
-                <p>{{ article.content }}</p>
-                    <div class="flex gap-3 mt-3">
-                        <a href="{{ path('article_show', {'id': article.id}) }}" class="text-xl text-blue-400 font-bold"->Voir</a>
-                        {% if is_granted('ROLE_ADMIN') or (is_granted('ROLE_POSTER') and app.user.username == article.author.username)%}
-                            <a href="{{ path('article_edit', {'id': article.id}) }}" class="text-xl text-yellow-600 font-bold">Modifier</a>
-                            {% include 'article/_delete_form.html.twig' %}
-                        {% endif %}
-                    </div>
-               
-                <div class="likes-parent">
-                    <a href="{{ path('article_like', {'id': article.id}) }}" class="like text-2xl {{ article.isLikedByUser(app.user) is same as(false) ? 'underline' : null }}" {{ app.user ? "data-like='false'" : null}}>-</a>
-                    <span id="vote-average">{{article.likesAverage}}</span>
-                    <a href="{{ path('article_like', {'id': article.id}) }}" class="like text-2xl {{ article.isLikedByUser(app.user) ? 'underline' : null }}" {{ app.user ? "data-like='true'" : null}}>+</a>
-                </div>
-                
-            </div>
-        {% else %}
-            Pas d'articles
-        {% endfor %}
+        <div class="likes-parent flex gap-2 items-center">
+            <a href="{{ path('article_like', {'id': article.id}) }}" class="like" {{ app.user ? "data-like='false'" : null}}><i
+                    class="text-red-500 fa-thumbs-down {{ article.isLikedByUser(app.user) is same as(false) ? 'fas ' : 'far' }}"
+                    ></i></a>
+            <span id="vote-average">{{article.likesAverage}}</span>
+            <a href="{{ path('article_like', {'id': article.id}) }}" class="like" {{ app.user ? "data-like='true'" : null}}><i
+                    class="text-green-500 fa-thumbs-up {{ article.isLikedByUser(app.user) ? 'fas' : 'far' }}"
+                    ></i></a>
+        </div>
+
+    </div>
+    {% else %}
+    Pas d'articles
+    {% endfor %}
 
     <div>
 
-    
-{% endblock %}
+
+        {% endblock %}

@@ -17,13 +17,14 @@
         {% endif %}
         <a href="{{ path('article_index') }}" class="text-xl font-bold">Retour</a>
     </div>
-    <div class="likes-parent">
-        <a href="{{ path('article_like', {'id': article.id}) }}"
-            class="like text-2xl {{ article.isLikedByUser(app.user) is same as(false) ? 'underline' : null }}"
-            data-like="false">-</a>
-        <span>{{article.likesAverage}}</span>
-        <a href="{{ path('article_like', {'id': article.id}) }}"
-            class="like text-2xl {{ article.isLikedByUser(app.user) ? 'underline' : null }}" data-like="true">+</a>
+    <div class="likes-parent flex gap-2 items-center">
+        <a href="{{ path('article_like', {'id': article.id}) }}" class="like"
+            {{ app.user ? "data-like='false'" : null}}><i
+                class="text-red-500 fa-thumbs-down {{ article.isLikedByUser(app.user) is same as(false) ? 'fas ' : 'far' }}"></i></a>
+        <span id="vote-average">{{article.likesAverage}}</span>
+        <a href="{{ path('article_like', {'id': article.id}) }}" class="like"
+            {{ app.user ? "data-like='true'" : null}}><i
+                class="text-green-500 fa-thumbs-up {{ article.isLikedByUser(app.user) ? 'fas' : 'far' }}"></i></a>
     </div>
 </div>
 

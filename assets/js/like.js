@@ -3,17 +3,23 @@ const likes = document.querySelectorAll('.like');
 const toggleClass = (data, likeEl) => {
 
   const parent = likeEl.closest(".likes-parent");
-  const [dislike, like] = parent.querySelectorAll(".like");
-
+  const [dislike, like] = parent.querySelectorAll("[class*='thumbs'");
+  console.log('test')
   if (data.selected === "none") {
-    dislike.classList.remove("underline");
-    like.classList.remove("underline");
+    dislike.classList.remove("fas");
+    like.classList.remove("fas");
+    dislike.classList.add("far");
+    like.classList.add("far");
   } else if (data.selected) {
-    dislike.classList.remove("underline");
-    like.classList.add("underline");
+    dislike.classList.remove("fas");
+    dislike.classList.add("far");
+    like.classList.remove("far");
+    like.classList.add("fas");
   } else {
-    like.classList.remove("underline");
-    dislike.classList.add("underline");
+    dislike.classList.remove("far");
+    dislike.classList.add("fas");
+    like.classList.remove("fas");
+    like.classList.add("far");
   }
   document.getElementById("vote-average").textContent = data.avg;
 }
@@ -22,7 +28,6 @@ const toggleClass = (data, likeEl) => {
 if (likes) {
   likes.forEach(l => l.addEventListener('click', function(e) {
     e.preventDefault();
-
     fetch(this.href, {
       headers: {
         Accept: "application/json",
@@ -37,6 +42,7 @@ if (likes) {
         return res.json();
       })
       .then((data) => {
+        console.log(data)
         toggleClass(data, this);
       })
       .catch((err) => {
