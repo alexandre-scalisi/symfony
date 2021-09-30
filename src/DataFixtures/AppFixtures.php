@@ -34,7 +34,7 @@ class AppFixtures extends Fixture
         $this->generateAdmin();
 
         // les likes et commentaires sont aussi générés indirectement dans cette fonction
-        $this->generateRandomArticles(20);
+        $this->generateRandomArticles(200);
             
         $this->manager->flush();
     }
