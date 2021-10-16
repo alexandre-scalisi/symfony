@@ -68,7 +68,7 @@ class ArticleController extends AbstractController
      */
     public function delete(Request $request, Article $article): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$article->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $article->getId(), $request->request->get('_token'))) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($article);
             $entityManager->flush();
@@ -94,11 +94,11 @@ class ArticleController extends AbstractController
                 ->setAuthor($this->getUser())
                 ->setArticle($article);
             $entityManager->persist($comment);
-            
+
 
             $entityManager->flush();
         }
-        
+
 
         return $this->renderForm('article/show.html.twig', [
             'article' => $article,
@@ -127,73 +127,45 @@ class ArticleController extends AbstractController
         ]);
     }
 
+
     /**
      * Route AJAX (requête crée dans assets/js/like.js)
-     * @Route("/{id}/like", name="article_like", methods={"POST"})
+     * @Route("/{id}/like/{isLiked<1|0>}", name="article_like", methods={"POST"})
      */
-
-    public function like(Request $request, Article $article, LikeRepository $likeRepository): Response
+    public function like(Request $request, bool $isLiked, Article $article, LikeRepository $likeRepository)
     {
         $user = $this->getUser();
-        
-        if(!$user) return $this->json('', 403);
-        
-        
-        if($article->getIsLikedByUser($user) !== null) {
-            $like = $likeRepository->findOneBy([
-                'article' => $article,
-                'liker' => $user
-            ]);
 
-            if($like->getIsLiked() === false && $request->getContent() === "false" || $like->getIsLiked() === true && $request->getContent() === "true") 
-                return $this->unclick($like, $article);
+        if (!$user) return $this->json('', 403);
 
-            return $this->changedMyMind($like, $request, $article);
+        $selected = null;
+        $like = $likeRepository->findOneBy([
+            'article' => $article,
+            'liker' => $user
+        ]);
 
-        } else return $this->newVote($user, $article, $request);
-        
-    }
-
-    private function unclick($like, $article) {
         $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->remove($like);
+
+        if (!$like) {
+            $like = new Like();
+            $like->setLiker($user)
+                ->setArticle($article)
+                ->setIsLiked($isLiked);
+            $entityManager->persist($like);
+            $article->addLike($like);
+            $selected = $isLiked;
+        } else if ($like && $like->getIsLiked() !== $isLiked) {
+            $selected = !$like->getIsLiked();
+            $like->setIsLiked($isLiked);
+        } else {
+            $entityManager->remove($like);
+        }
+
         $entityManager->flush();
-        $avg = $article->getLikesAverage();
+
         return $this->json([
-            'message' => 'Vous avez bien désélectionné',
-            'selected' => 'none',
-            'avg' => $avg
+            'selected' => $selected,
+            'avg' => $article->getLikesAverage(),
         ]);
     }
-
-    private function changedMyMind($like, $request, $article) {
-        $entityManager = $this->getDoctrine()->getManager();
-        $like->setIsLiked($request->getContent() === "true" ? true : false);
-            $entityManager->flush();
-            $avg = $article->getLikesAverage();
-            return $this->json([
-                'message' => 'Vous avez bien changé d\'avis',
-                'selected' => $like->getIsLiked(),
-                'avg' => $avg
-            ]);
-    }
-
-    private function newVote($user, $article, $request) {
-        $entityManager = $this->getDoctrine()->getManager();
-        $like = new Like();
-        $like->setLiker($user)
-            ->setArticle($article)
-            ->setIsLiked($request->getContent() === "true" ? true : false);
-        $entityManager->persist($like);
-        $article->addLike($like);
-        $entityManager->flush();
-        $avg = $article->getLikesAverage();
-        return $this->json([
-            'message' => "Vous avez bien selectionné",
-            'selected' => $like->getIsLiked(),
-            'avg' => $avg
-        ]);
-    }
-
-    
 }

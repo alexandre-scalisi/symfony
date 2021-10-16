@@ -1,53 +1,48 @@
-const likes = document.querySelectorAll('.like');
+const likes = document.querySelectorAll(".like");
 
-const toggleClass = (data, likeEl) => {
-
-  const parent = likeEl.closest(".likes-parent");
-  const [dislike, like] = parent.querySelectorAll("[class*='thumbs'");
-  console.log('test')
-  if (data.selected === "none") {
-    dislike.classList.remove("fas");
-    like.classList.remove("fas");
-    dislike.classList.add("far");
-    like.classList.add("far");
-  } else if (data.selected) {
-    dislike.classList.remove("fas");
-    dislike.classList.add("far");
-    like.classList.remove("far");
-    like.classList.add("fas");
+const toggleClass = (item, active) => {
+  if(active) {
+    item.classList.add('fas')
+    item.classList.remove('far')
   } else {
-    dislike.classList.remove("far");
-    dislike.classList.add("fas");
-    like.classList.remove("fas");
-    like.classList.add("far");
+    item.classList.add("far");
+    item.classList.remove("fas");
   }
-  document.getElementById("vote-average").textContent = data.avg;
 }
 
+const handleLike = (data, likeEl) => {
+  const parent = likeEl.closest(".likes-parent");
+  const [dislike, like] = parent.querySelectorAll("[class*='thumbs'");
+  console.log(data.avg)
+  toggleClass(dislike, data.selected === false)
+  toggleClass(like, data.selected === true)
+ 
+  parent.querySelector("#vote-average").textContent = data.avg;
+};
 
 if (likes) {
-  likes.forEach(l => l.addEventListener('click', function(e) {
-    e.preventDefault();
-    fetch(this.href, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: this.dataset.like,
+  likes.forEach((l) =>
+    l.addEventListener("click", function (e) {
+      e.preventDefault();
+      const href = this.href;
+      fetch(href, {
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      })
+        .then((res) => {
+          if (res.status === 403)
+            throw new Error("Vous devez être connecté pour voter");
+          return res.json();
+        })
+        .then((data) => {
+          handleLike(data, this);
+        })
+        .catch((err) => {
+          alert(err.message);
+        });
     })
-      .then((res) => {
-        if (res.status === 403)
-          throw new Error("Vous devez être connecté pour voter");
-        return res.json();
-      })
-      .then((data) => {
-        console.log(data)
-        toggleClass(data, this);
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
-  })
-)}
-
+  );
+}

@@ -1,0 +1,7 @@
+<div class="likes-parent flex gap-2 items-center my-4">
+  <a href="{{ path('article_like', {'id': article.id, 'isLiked': 0}) }}" class="like"><i
+      class="text-red-500 fa-thumbs-down {{ article.isLikedByUser(app.user) is same as(false) ? 'fas' : 'far' }}"></i></a>
+  <span id="vote-average" class="text-xl font-font-medium">{{article.likesAverage}}</span>
+  <a href="{{ path('article_like', {'id': article.id, 'isLiked': 1}) }}" class="like"><i
+      class="text-green-500 fa-thumbs-up {{ article.isLikedByUser(app.user) ? 'fas' : 'far' }}"></i></a>
+</div>
