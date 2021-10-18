@@ -8,7 +8,7 @@ use App\Factory\LikeFactory;
 use App\Factory\UserFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Faker;
+use Faker\Factory;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
@@ -32,11 +32,13 @@ class AppFixtures extends Fixture
                 'author' => UserFactory::random()
             ];
         });
-        
+
         CommentFactory::createMany(360, function () {
+            $randomArticle = ArticleFactory::random();
             return [
                 'author' => UserFactory::random(),
-                'article' => ArticleFactory::random(),
+                'article' => $randomArticle,
+                'createdAt' => Factory::create()->dateTimeBetween($randomArticle->getCreatedAt())
             ];
         });
 

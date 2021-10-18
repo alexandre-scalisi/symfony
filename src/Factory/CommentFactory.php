@@ -39,7 +39,6 @@ final class CommentFactory extends ModelFactory
     {
         return [
             'message' => self::faker()->text(),
-            'createdAt' => self::faker()->dateTimeBetween()
         ];
     }
 
